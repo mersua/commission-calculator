@@ -12,13 +12,13 @@ use GuzzleHttp\Exception\RequestException;
 
 class CurrencyConversionServiceTest extends TestCase
 {
-    private string $currencyApiUrl;
-    private string $currencyApiKey;
+    private static string $currencyApiUrl;
+    private static string $currencyApiKey;
 
-    protected function setUp(): void
+    public static function setUpBeforeClass(): void
     {
-        $this->currencyApiUrl = $_ENV['CURRENCY_API_URL'];
-        $this->currencyApiKey = $_ENV['CURRENCY_API_KEY'];
+        self::$currencyApiUrl = $_ENV['CURRENCY_API_URL'];
+        self::$currencyApiKey = $_ENV['CURRENCY_API_KEY'];
     }
 
     public function testConvertToEURSuccess()
@@ -26,14 +26,16 @@ class CurrencyConversionServiceTest extends TestCase
         $clientMock = $this->createMock(Client::class);
         $clientMock->method('get')->willReturn(new Response(200, [], '{"rates": {"USD": 1.2}}'));
 
-        $service = new CurrencyConversionService($this->currencyApiUrl, $this->currencyApiKey);
+        $service = new CurrencyConversionService($clientMock, self::$currencyApiUrl, self::$currencyApiKey);
 
-        $this->assertEquals(83.33, $service->convertToEUR(100, 'USD'));
+        $this->assertEquals(83.33, round($service->convertToEUR(100, 'USD'), 2));
     }
 
     public function testConvertToEURNoConversionNeeded()
     {
-        $service = new CurrencyConversionService($this->currencyApiUrl, $this->currencyApiKey);
+        $clientMock = $this->createMock(Client::class);
+
+        $service = new CurrencyConversionService($clientMock, self::$currencyApiUrl, self::$currencyApiKey);
 
         $this->assertEquals(100, $service->convertToEUR(100, 'EUR'));
     }
@@ -43,7 +45,7 @@ class CurrencyConversionServiceTest extends TestCase
         $clientMock = $this->createMock(Client::class);
         $clientMock->method('get')->willReturn(new Response(200, [], '{"rates": {}}'));
 
-        $service = new CurrencyConversionService($this->currencyApiUrl, $this->currencyApiKey);
+        $service = new CurrencyConversionService($clientMock, self::$currencyApiUrl, self::$currencyApiKey);
 
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Currency rate for "USD" not found');
@@ -55,10 +57,10 @@ class CurrencyConversionServiceTest extends TestCase
         $clientMock = $this->createMock(Client::class);
         $clientMock->method('get')->willThrowException(new RequestException('Error Communicating with Server', new \GuzzleHttp\Psr7\Request('GET', 'test')));
 
-        $service = new CurrencyConversionService($this->currencyApiUrl, $this->currencyApiKey);
+        $service = new CurrencyConversionService($clientMock, self::$currencyApiUrl, self::$currencyApiKey);
 
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Error fetching currency rates: Error Communicating with Server');
+        $this->expectExceptionMessage('Error fetching or processing currency data: Error Communicating with Server');
         $service->convertToEUR(100, 'USD');
     }
 }

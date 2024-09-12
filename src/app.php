@@ -8,6 +8,7 @@ use App\Service\CommissionCalculator;
 use App\Service\BinLookupService;
 use App\Service\CurrencyConversionService;
 use Dotenv\Dotenv;
+use GuzzleHttp\Client;
 
 $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
 $dotenv->load();
@@ -18,9 +19,10 @@ try {
     $transactions = file($argv[1]);
 
     if (false !== $transactions) {
+        $client = new Client();
         $calculator = new CommissionCalculator(
-            new BinLookupService($_ENV['BIN_API_URL']),
-            new CurrencyConversionService($_ENV['CURRENCY_API_URL'], $_ENV['CURRENCY_API_KEY'])
+            new BinLookupService($client, $_ENV['BIN_API_URL']),
+            new CurrencyConversionService($client, $_ENV['CURRENCY_API_URL'], $_ENV['CURRENCY_API_KEY'])
         );
 
         foreach ($transactions as $transaction) {

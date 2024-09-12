@@ -9,11 +9,13 @@ use GuzzleHttp\Client;
 
 class BinLookupService implements BinProviderInterface
 {
+    private string $binApiUrl;
     private Client $client;
 
-    public function __construct(string $binApiUrl)
+    public function __construct(Client $client, string $binApiUrl)
     {
-        $this->client = new Client(['base_uri' => $binApiUrl]);
+        $this->binApiUrl = $binApiUrl;
+        $this->client = $client;
     }
 
     /**
@@ -22,7 +24,7 @@ class BinLookupService implements BinProviderInterface
     public function getBinCountryCode(string $bin): string
     {
         try {
-            $response = $this->client->get($bin);
+            $response = $this->client->get(sprintf('%s%s', $this->binApiUrl, $bin));
             $data = json_decode($response->getBody()->getContents());
 
             if (!isset($data->country->alpha2) || strlen($data->country->alpha2) !== 2) {

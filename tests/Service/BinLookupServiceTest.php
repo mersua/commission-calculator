@@ -12,11 +12,11 @@ use GuzzleHttp\Exception\RequestException;
 
 class BinLookupServiceTest extends TestCase
 {
-    private string $binApiUrl;
+    private static string $binApiUrl;
 
-    protected function setUp(): void
+    public static function setUpBeforeClass(): void
     {
-        $this->binApiUrl = $_ENV['BIN_API_URL'];
+        self::$binApiUrl = $_ENV['BIN_API_URL'];
     }
 
     public function testGetBinCountryCodeSuccess()
@@ -24,7 +24,7 @@ class BinLookupServiceTest extends TestCase
         $clientMock = $this->createMock(Client::class);
         $clientMock->method('get')->willReturn(new Response(200, [], '{"country": {"alpha2": "DE"}}'));
 
-        $service = new BinLookupService($this->binApiUrl);
+        $service = new BinLookupService($clientMock, self::$binApiUrl);
 
         $this->assertEquals('DE', $service->getBinCountryCode('45717360'));
     }
@@ -34,7 +34,7 @@ class BinLookupServiceTest extends TestCase
         $clientMock = $this->createMock(Client::class);
         $clientMock->method('get')->willReturn(new Response(200, [], '{}'));
 
-        $service = new BinLookupService($this->binApiUrl);
+        $service = new BinLookupService($clientMock, self::$binApiUrl);
 
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Invalid response: BIN lookup did not return a valid country code');
@@ -46,10 +46,10 @@ class BinLookupServiceTest extends TestCase
         $clientMock = $this->createMock(Client::class);
         $clientMock->method('get')->willThrowException(new RequestException('Error Communicating with Server', new \GuzzleHttp\Psr7\Request('GET', 'test')));
 
-        $service = new BinLookupService($this->binApiUrl);
+        $service = new BinLookupService($clientMock, self::$binApiUrl);
 
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Error fetching BIN data: Error Communicating with Server');
+        $this->expectExceptionMessage('Error fetching or processing BIN "45717360" data: Error Communicating with Server');
         $service->getBinCountryCode('45717360');
     }
 }

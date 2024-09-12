@@ -9,13 +9,15 @@ use GuzzleHttp\Client;
 
 class CurrencyConversionService implements CurrencyProviderInterface
 {
+    private string $currencyApiUrl;
     private string $currencyApiKey;
     private Client $client;
 
-    public function __construct(string $currencyApiUrl, string $currencyApiKey)
+    public function __construct(Client $client, string $currencyApiUrl, string $currencyApiKey)
     {
+        $this->currencyApiUrl = $currencyApiUrl;
         $this->currencyApiKey = $currencyApiKey;
-        $this->client = new Client(['base_uri' => $currencyApiUrl]);
+        $this->client = $client;
     }
 
     /**
@@ -29,7 +31,7 @@ class CurrencyConversionService implements CurrencyProviderInterface
 
         try {
             $response = $this->client->get(
-                sprintf('latest?%s', http_build_query(['access_key' => $this->currencyApiKey]))
+                sprintf('%s?%s', $this->currencyApiUrl, http_build_query(['access_key' => $this->currencyApiKey]))
 
             );
             $data = json_decode($response->getBody()->getContents());
