@@ -32,7 +32,7 @@ class BinLookupService implements BinProviderInterface
             return $data->country->alpha2;
 
         } catch (\Throwable $e) {
-            throw new \Exception(sprintf('%s "%s"', 'Error fetching or processing BIN data:', $e->getMessage()));
+            throw new \Exception(sprintf('Error fetching or processing BIN "%s" data: %s', $bin, $e->getMessage()));
         }
     }
 }

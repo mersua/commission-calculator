@@ -13,7 +13,7 @@ $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
 $dotenv->load();
 
 try {
-    printf('%s%s', 'Commission calculation started:', PHP_EOL);
+    printf('Commission calculation started:%s', PHP_EOL);
 
     $transactions = file($argv[1]);
 
@@ -28,15 +28,15 @@ try {
                 $result = $calculator->calculateCommission($transaction);
                 printf('%s%s', $result, PHP_EOL);
             } catch (Exception $e) {
-                printf('%s %s%s', 'Error processing transaction:', $e->getMessage(), PHP_EOL);
+                printf('Error processing transaction: %s%s', $e->getMessage(), PHP_EOL);
             }
         }
     } else {
-        printf('%s "%s"%s', 'There is a problem with reading an input file:', $argv[1], PHP_EOL);
+        printf('There is a problem with reading an input file: "%s"%s', $argv[1], PHP_EOL);
     }
 
-    printf('%s%s', 'Commission calculation ended!', PHP_EOL);
+    printf('Commission calculation ended!%s', PHP_EOL);
 } catch (Exception $e) {
-    printf('%s %s%s', 'Fatal error:', $e->getMessage(), PHP_EOL);
+    printf('Fatal error: %s%s', $e->getMessage(), PHP_EOL);
     exit(1);
 }

@@ -29,7 +29,7 @@ class CurrencyConversionService implements CurrencyProviderInterface
 
         try {
             $response = $this->client->get(
-                sprintf('%s?%s', 'latest', http_build_query(['access_key' => $this->currencyApiKey]))
+                sprintf('latest?%s', http_build_query(['access_key' => $this->currencyApiKey]))
 
             );
             $data = json_decode($response->getBody()->getContents());
@@ -41,7 +41,7 @@ class CurrencyConversionService implements CurrencyProviderInterface
             return $amount / $data->rates->$currency;
 
         } catch (\Throwable $e) {
-            throw new \Exception('Error fetching or processing currency data: ' . $e->getMessage());
+            throw new \Exception(sprintf('Error fetching or processing currency data: %s', $e->getMessage()));
         }
     }
 }
