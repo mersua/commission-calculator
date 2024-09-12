@@ -51,7 +51,7 @@ class CommissionCalculator
             return ceil($commission * 100) / 100;
 
         } catch (\Exception $e) {
-            throw new \Exception('Error calculating commission: ' . $e->getMessage());
+            throw new \Exception(sprintf('Error calculating commission: %s', $e->getMessage()));
         }
     }
 }
